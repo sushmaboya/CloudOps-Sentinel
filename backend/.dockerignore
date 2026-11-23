@@ -1,0 +1,40 @@
+# ==============================================================================
+# CloudOps Sentinel - Backend .dockerignore
+# ==============================================================================
+
+# Virtual environments
+.venv/
+venv/
+ENV/
+env/
+
+# Python cache & bytecode
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+
+# Testing & Coverage
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+tests/
+
+# Secrets & Environment configs (Strictly avoided in image builds)
+.env
+.env.*
+!.env.example
+
+# Git & IDE files
+.git/
+.gitignore
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Local runtime logs
+*.log
+logs/
