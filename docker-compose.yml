@@ -1,0 +1,89 @@
+
+# ==============================================================================
+# CloudOps Sentinel - Docker Compose Configuration (Phase 2)
+# Backend: FastAPI | Frontend: React + TypeScript + Nginx
+# ==============================================================================
+
+services:
+  # ----------------------------------------------------------------------------
+  # Backend Service: FastAPI Engine & Telemetry Aggregator
+  # ----------------------------------------------------------------------------
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    image: cloudops-sentinel-backend:latest
+    container_name: cloudops-sentinel-backend
+    restart: unless-stopped
+
+    ports:
+      - "8000:8000"
+
+    environment:
+      - PROJECT_NAME=CloudOps Sentinel
+      - ENVIRONMENT=production
+      - DEBUG=false
+      - HOST=0.0.0.0
+      - PORT=8000
+      - CORS_ORIGINS=http://localhost:3000,http://127.0.0.1:3000,http://localhost:5173,http://127.0.0.1:5173,http://localhost:8080
+      - IS_SIMULATED=true
+      - SIMULATION_REGION=us-east-1
+
+    volumes:
+      - backend_logs:/app/logs
+
+    networks:
+      - cloudops-net
+
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8000/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 5s
+
+  # ----------------------------------------------------------------------------
+  # Frontend Service: React 19 + TypeScript + Nginx
+  # ----------------------------------------------------------------------------
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        VITE_API_BASE_URL: http://localhost:8000
+
+    image: cloudops-sentinel-frontend:latest
+    container_name: cloudops-sentinel-frontend
+    restart: unless-stopped
+
+    ports:
+      - "3000:8080"
+
+    depends_on:
+      backend:
+        condition: service_healthy
+
+    networks:
+      - cloudops-net
+
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O - http://127.0.0.1:8080/healthz || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 5s
+
+# ----------------------------------------------------------------------------
+# Isolated Internal Network
+# ----------------------------------------------------------------------------
+networks:
+  cloudops-net:
+    driver: bridge
+    name: cloudops-sentinel-network
+
+# ----------------------------------------------------------------------------
+# Persistent Volumes
+# ----------------------------------------------------------------------------
+volumes:
+  backend_logs:
+    name: cloudops-sentinel-backend-logs

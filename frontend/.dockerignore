@@ -1,0 +1,28 @@
+# ==============================================================================
+# CloudOps Sentinel - Frontend .dockerignore
+# ==============================================================================
+
+# Node dependencies & local builds
+node_modules/
+dist/
+dist-ssr/
+*.tsbuildinfo
+
+# Secrets & Environment configs (Strictly avoided in image builds)
+.env
+.env.*
+!.env.example
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+pnpm-debug.log*
+
+# Git & IDE files
+.git/
+.gitignore
+.idea/
+.vscode/
+.oxlintrc.json
+README.md
